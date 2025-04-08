@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import LLMChain
-from openai.error import OpenAIError  # Import OpenAIError
+from openai import OpenAIError  # Import OpenAIError from the correct location
 
 # Load API keys securely from Streamlit secrets
 openai_api_key = st.secrets.get("open-ai-key", "")
@@ -132,3 +132,4 @@ def reset_conversation():
 
 if __name__ == "__main__":
     main()
+
