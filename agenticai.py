@@ -26,7 +26,6 @@ def create_conversation_chain():
     prompt_template = """
     You are an assistant named {agent_name}. Your role is {agent_role}.
     You will assist users by responding based on the flow in your conversation data.
-    Use the user's messages and maintain a friendly, helpful tone. You have a memory of the conversation.
     {conversation_history}
     User: {user_message}
     Assistant: 
