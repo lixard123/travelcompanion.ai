@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 import time
-from langchain_community.chat_models import ChatOpenAI  # Updated import
+from langchain_openai import ChatOpenAI  # Updated import
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationChain  # Use ConversationChain instead
+from langchain.chains import LLMChain  # Use LLMChain instead of ConversationChain, and RunnableWithMessageHistory is the newest replacement.
 
 # Load API keys securely from Streamlit secrets
 openai_api_key = st.secrets.get("open-ai-key", "")
@@ -40,7 +40,7 @@ def create_conversation_chain():
     
     # Initialize the OpenAI chat model (GPT-4)
     try:
-        llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4")
+        llm = ChatOpenAI(api_key=openai_api_key, model="gpt-4")
     except Exception as e:
         st.error(f"Error initializing ChatOpenAI: {e}")
         return None
@@ -49,7 +49,7 @@ def create_conversation_chain():
     memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
 
     # Create conversation chain with memory and prompt
-    conversation_chain = ConversationChain(
+    conversation_chain = LLMChain(
         llm=llm,
         memory=memory,
         prompt=prompt
@@ -85,9 +85,7 @@ def main():
         
         # Run the conversation chain and get the agent's response
         try:
-            agent_response = conversation_chain.run(
-                {"conversation_history": conversation_history, "user_message": user_message}
-            )
+            agent_response = conversation_chain.run(user_message)
         except Exception as e:
             st.error(f"Error during conversation chain run: {e}")
             return
