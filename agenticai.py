@@ -21,7 +21,7 @@ def create_conversation_chain():
     memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
 
     # Set up the LLM (Language Model) for the conversation
-    llm = ChatOpenAI(openai_api_key=openai.api_key, model="gpt-3.5-turbo")
+    llm = ChatOpenAI(openai_api_key=openai.api_key, model="gpt-4o")
 
     # Define the prompt template based on the conversation flow
     prompt_template = """
