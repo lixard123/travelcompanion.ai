@@ -3,6 +3,7 @@ import pandas as pd
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 import openai
 
@@ -20,12 +21,12 @@ def create_conversation_chain():
     memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
 
     # Set up the LLM (Language Model) for the conversation
-    llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4")  # Updated to GPT-4
+    llm = ChatOpenAI(openai_api_key=openai.api_key, model="gpt-4")
 
     # Define the prompt template based on the conversation flow
     prompt_template = """
     You are an assistant named {agent_name}. Your role is {agent_role}.
-    You will assist users by responding based on the conversation flow data from your guide.
+    You will assist users by responding based on the flow in your conversation data.
     Use the user's messages and maintain a friendly, helpful tone. You have a memory of the conversation.
     {conversation_history}
     User: {user_message}
@@ -59,7 +60,7 @@ def main():
     # Initialize conversation chain
     conversation_chain = create_conversation_chain()
 
-    # Display agent information (e.g., Olivia the Concierge)
+    # Display agent information (Olivia the Concierge)
     agent_name = "Olivia"
     agent_role = "Concierge"
     conversation_history = ""
@@ -79,25 +80,6 @@ def main():
                                                 agent_role=agent_role, 
                                                 conversation_history=conversation_history, 
                                                 user_message=user_message)
-
-        # Display the agent's response
-        st.write(f"**{agent_name} (Concierge):** {agent_response}")
-
-        # Update conversation history with agent's response
-        conversation_history += f"Assistant: {agent_response}\n"
-
-    # Get user input (chat with the agent)
-    user_input = st.text_input("Ask me anything about your travel plans:")
-
-    if user_input:
-        # Add user input to the conversation history
-        conversation_history += f"User: {user_input}\n"
-
-        # Get the agent's response based on the conversation flow
-        agent_response = conversation_chain.run(agent_name=agent_name, 
-                                                agent_role=agent_role, 
-                                                conversation_history=conversation_history, 
-                                                user_message=user_input)
 
         # Display the agent's response
         st.write(f"**{agent_name} (Concierge):** {agent_response}")
