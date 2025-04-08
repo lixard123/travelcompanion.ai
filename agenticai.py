@@ -1,36 +1,42 @@
-import pandas as pd
-import openai
 import streamlit as st
+import pandas as pd
+from langchain_community.chat_models import ChatOpenAI  # Updated import
 from langchain.prompts import PromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import RunnableWithMessageHistory
 from langchain.memory import ConversationBufferMemory
+from langchain.chains import RunnableWithMessageHistory  # Updated import for community version
 
 # Load API keys securely from Streamlit secrets
 openai_api_key = st.secrets.get("open-ai-key", "")
 
+# Define the Excel file path for conversation flow
+excel_file_path = 'conversation_flow.xlsx'
+
 # Load the conversation flow from the Excel file
 def load_conversation_flow():
-    # Path to the Excel file in the main directory
-    excel_file_path = 'conversation_flow.xlsx'  # Assuming the file is in the main directory
     df = pd.read_excel(excel_file_path)
     return df
 
-# Create a RunnableWithMessageHistory based on the loaded conversation flow
+# Create the conversation chain with memory and prompt
 def create_conversation_chain():
-    # Set up the LLM (GPT-4 model) with OpenAI API key
-    llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4")
-    
-    # Set up memory to store conversation history
-    memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
-    
-    # Set up prompt template (define the format of the conversation prompt)
+    # Define the template for conversation prompts
+    prompt_template = """
+    You are a helpful assistant. Here is the conversation history:
+    {conversation_history}
+    User's message: {user_message}
+    Respond accordingly.
+    """
     prompt = PromptTemplate(
         input_variables=["conversation_history", "user_message"],
-        template="The following is a conversation with an AI assistant:\n{conversation_history}User: {user_message}\nAssistant:"
+        template=prompt_template
     )
     
-    # Create a RunnableWithMessageHistory with memory and prompt
+    # Initialize the OpenAI chat model (GPT-4)
+    llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4")
+
+    # Set up memory to store conversation history
+    memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
+
+    # Create conversation chain with memory and prompt
     conversation_chain = RunnableWithMessageHistory(
         llm=llm,
         memory=memory,
@@ -38,36 +44,44 @@ def create_conversation_chain():
     )
     return conversation_chain
 
-# Main function to load data, process conversation flow, and return responses
+# Main function to handle the conversation loop
 def main():
-    # Load conversation flow from the Excel file
+    # Load the conversation flow data
     df = load_conversation_flow()
 
-    # Initialize the conversation chain
+    # Create the conversation chain
     conversation_chain = create_conversation_chain()
 
-    # Start the conversation loop
+    # Initialize conversation history
     conversation_history = ""
+
+    # Start the conversation loop based on the flow from the Excel file
     for index, row in df.iterrows():
-        # Extract user and assistant messages from the Excel file
-        user_message = row['User Message']
-        assistant_message = row['Assistant Message']
+        # Display the conversation step
+        user_message = row['User Message']  # Assuming 'User Message' column exists in your Excel
 
-        # Append the conversation history for each step
+        st.write(f"User: {user_message}")
+        
+        # Append the user's message to the conversation history
         conversation_history += f"User: {user_message}\n"
-        conversation_history += f"Assistant: {assistant_message}\n"
-
-        # Get the agent's response based on the conversation flow
+        
+        # Run the conversation chain and get the agent's response
         agent_response = conversation_chain.run(
-            conversation_history=conversation_history, 
-            user_message=user_message
+            {"conversation_history": conversation_history, "user_message": user_message}
         )
         
         # Display the agent's response
-        st.write(f"User: {user_message}")
-        st.write(f"Assistant: {assistant_message}")
-        st.write(f"Agent's Response: {agent_response}")
+        st.write(f"Assistant: {agent_response}")
+        
+        # Update the conversation history with the agent's response
+        conversation_history += f"Assistant: {agent_response}\n"
+        
+        # Optionally, pause before proceeding to the next iteration for better user experience
+        st.write("**Waiting for next input...**\n")
+        
+        # Add a brief delay (optional)
+        st.time.sleep(2)
 
-# Run the main function
+# Run the main function when the script is executed
 if __name__ == "__main__":
     main()
