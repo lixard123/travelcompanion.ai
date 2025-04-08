@@ -3,7 +3,7 @@ import pandas as pd
 from langchain_community.chat_models import ChatOpenAI  # Updated import
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
-from langchain.chains import RunnableWithMessageHistory  # Updated import for community version
+from langchain.chains import ConversationChain  # Use ConversationChain instead
 
 # Load API keys securely from Streamlit secrets
 openai_api_key = st.secrets.get("open-ai-key", "")
@@ -37,7 +37,7 @@ def create_conversation_chain():
     memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
 
     # Create conversation chain with memory and prompt
-    conversation_chain = RunnableWithMessageHistory(
+    conversation_chain = ConversationChain(
         llm=llm,
         memory=memory,
         prompt=prompt
