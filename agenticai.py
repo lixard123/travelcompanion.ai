@@ -8,6 +8,10 @@ from langchain.llms import OpenAI
 from langchain.chains import RetrievalQA
 import os
 
+
+# Load API keys securely from Streamlit secrets
+openai_api_key = st.secrets.get("open-ai-key", "")
+
 # Read the conversation flow from Excel (assuming the file is already uploaded or available locally)
 def load_conversation_flow(excel_path):
     df = pd.read_excel(excel_path)
