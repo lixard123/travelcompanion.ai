@@ -30,7 +30,7 @@ def load_pdf_from_folder(pdf_folder_path):
     return all_pages_content
 
 # Define the LLM and Conversation Chain
-def create_conversation_chain(brochure_content):
+def create_conversation_chain():
     # Initialize the memory to store conversation history
     memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
 
@@ -64,57 +64,4 @@ def main():
     excel_path = "travel_agent_conversation_flow.xlsx"
     
     # Load conversation flow from Excel file
-    df = load_conversation_flow(excel_path)
-
-    # Streamlit app title
-    st.title("Travel Companion Agent Chat")
-
-    # Load PDF brochures from the "brochures" folder
-    brochure_folder_path = "brochures"
-    all_brochures_content = load_pdf_from_folder(brochure_folder_path)
-
-    # Display the instructions to the user
-    st.write("Welcome! I am here to help with your travel plans. Let me know what you'd like assistance with.")
-
-    # Display agent information (Olivia the Concierge)
-    agent_name = "Olivia"
-    agent_role = "Concierge"
-    conversation_history = ""
-
-    # Process the conversation flow from the loaded Excel data
-    for index, row in df.iterrows():
-        # Extract role-specific data
-        user_message = row['User Message']
-        assistant_message = row['Assistant Message']
-
-        # Append the conversation history for each step
-        conversation_history += f"User: {user_message}\n"
-        conversation_history += f"Assistant: {assistant_message}\n"
-
-        # Get brochure content for this conversation step (assuming we're using the first brochure file here)
-        brochure_content = " ".join(all_brochures_content.values())  # You can modify to select a specific brochure
-        
-        # Ensure the correct parameters are passed to the LLMChain run method
-        try:
-            # Print debug information to verify parameters
-            st.write(f"Conversation history so far: {conversation_history}")
-            st.write(f"Brochure content: {brochure_content[:200]}...")  # Truncate for display
-
-            # Get the agent's response based on the conversation flow and brochure content
-            agent_response = conversation_chain.run(agent_name=agent_name, 
-                                                    agent_role=agent_role, 
-                                                    conversation_history=conversation_history, 
-                                                    brochure_content=brochure_content, 
-                                                    user_message=user_message)
-
-            # Display the agent's response
-            st.write(f"**{agent_name} (Concierge):** {agent_response}")
-
-            # Update conversation history with agent's response
-            conversation_history += f"Assistant: {agent_response}\n"
-        except Exception as e:
-            # Catch and display any errors
-            st.error(f"Error occurred during agent response generation: {e}")
-
-if __name__ == "__main__":
-    main()
+    df = load_con_
