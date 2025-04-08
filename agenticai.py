@@ -86,7 +86,11 @@ def main():
     # Get the current step's message from the CSV
     if st.session_state.step_index < len(df):
         current_step_message = df.iloc[st.session_state.step_index]['Message']
-        role = df.iloc[st.session_state.step_index]['Role']  # get role
+        # Check if 'Role' column exists before accessing it
+        if 'Role' in df.columns:
+            role = df.iloc[st.session_state.step_index]['Role']  # get role
+        else:
+            role = "Assistant"  # Default role if 'Role' column is missing
 
         if role == "Assistant":
             st.text(f"Assistant: {current_step_message}")  # Show the assistant's message from CSV
@@ -132,4 +136,3 @@ def reset_conversation():
 
 if __name__ == "__main__":
     main()
-
