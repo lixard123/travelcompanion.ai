@@ -94,18 +94,27 @@ def main():
         # Get brochure content for this conversation step (assuming we're using the first brochure file here)
         brochure_content = " ".join(all_brochures_content.values())  # You can modify to select a specific brochure
         
-        # Get the agent's response based on the conversation flow and brochure content
-        agent_response = conversation_chain.run(agent_name=agent_name, 
-                                                agent_role=agent_role, 
-                                                conversation_history=conversation_history, 
-                                                brochure_content=brochure_content, 
-                                                user_message=user_message)
+        # Ensure the correct parameters are passed to the LLMChain run method
+        try:
+            # Print debug information to verify parameters
+            st.write(f"Conversation history so far: {conversation_history}")
+            st.write(f"Brochure content: {brochure_content[:200]}...")  # Truncate for display
 
-        # Display the agent's response
-        st.write(f"**{agent_name} (Concierge):** {agent_response}")
+            # Get the agent's response based on the conversation flow and brochure content
+            agent_response = conversation_chain.run(agent_name=agent_name, 
+                                                    agent_role=agent_role, 
+                                                    conversation_history=conversation_history, 
+                                                    brochure_content=brochure_content, 
+                                                    user_message=user_message)
 
-        # Update conversation history with agent's response
-        conversation_history += f"Assistant: {agent_response}\n"
+            # Display the agent's response
+            st.write(f"**{agent_name} (Concierge):** {agent_response}")
+
+            # Update conversation history with agent's response
+            conversation_history += f"Assistant: {agent_response}\n"
+        except Exception as e:
+            # Catch and display any errors
+            st.error(f"Error occurred during agent response generation: {e}")
 
 if __name__ == "__main__":
     main()
