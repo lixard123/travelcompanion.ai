@@ -3,7 +3,6 @@ import pandas as pd
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 import openai
 
@@ -76,10 +75,12 @@ def main():
         conversation_history += f"Assistant: {assistant_message}\n"
 
         # Get the agent's response based on the conversation flow
-        agent_response = conversation_chain.run(agent_name=agent_name, 
-                                                agent_role=agent_role, 
-                                                conversation_history=conversation_history, 
-                                                user_message=user_message)
+        agent_response = conversation_chain.run(
+            agent_name=agent_name,
+            agent_role=agent_role,
+            conversation_history=conversation_history,
+            user_message=user_message
+        )
 
         # Display the agent's response
         st.write(f"**{agent_name} (Concierge):** {agent_response}")
@@ -95,10 +96,12 @@ def main():
         conversation_history += f"User: {user_input}\n"
 
         # Get the agent's response based on the conversation flow
-        agent_response = conversation_chain.run(agent_name=agent_name, 
-                                                agent_role=agent_role, 
-                                                conversation_history=conversation_history, 
-                                                user_message=user_input)
+        agent_response = conversation_chain.run(
+            agent_name=agent_name,
+            agent_role=agent_role,
+            conversation_history=conversation_history,
+            user_message=user_input
+        )
 
         # Display the agent's response
         st.write(f"**{agent_name} (Concierge):** {agent_response}")
