@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import time
 from langchain_community.chat_models import ChatOpenAI  # Updated import
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
@@ -79,8 +80,8 @@ def main():
         # Optionally, pause before proceeding to the next iteration for better user experience
         st.write("**Waiting for next input...**\n")
         
-        # Add a brief delay (optional)
-        st.time.sleep(2)
+        # Add a brief delay (use time.sleep instead of st.time.sleep)
+        time.sleep(2)
 
 # Run the main function when the script is executed
 if __name__ == "__main__":
