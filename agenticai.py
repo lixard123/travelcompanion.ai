@@ -10,7 +10,7 @@ from openai import OpenAIError  # Import OpenAIError from the correct location
 openai_api_key = st.secrets.get("open-ai-key", "")
 
 # Define the CSV file path for conversation flow
-csv_file_path = 'conversation.flow.csv'
+csv_file_path = 'conversation_flow.csv'
 
 # Load conversation flow from CSV
 def load_conversation_flow_from_csv():
