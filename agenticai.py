@@ -35,3 +35,60 @@ def create_conversation_chain():
 
     # Instantiate the prompt with dynamic fields for agent name, role, and conversation history
     prompt = PromptTemplate(
+        input_variables=["agent_name", "agent_role", "conversation_history", "user_message"],
+        template=prompt_template
+    )
+    
+    # Create the LLM chain with memory
+    chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
+    return chain
+
+# Main function to handle the app flow
+def main():
+    # File path to the conversation flow (assuming it's in the home directory)
+    excel_path = "travel_agent_conversation_flow.xlsx"
+    
+    # Load conversation flow from Excel file
+    df = load_conversation_flow(excel_path)
+
+    # Streamlit app title
+    st.title("Travel Companion Agent Chat")
+
+    # Display the instructions to the user
+    st.write("Welcome! I am here to help with your travel plans. Let me know what you'd like assistance with.")
+
+    # Display agent information (Olivia the Concierge)
+    agent_name = "Olivia"
+    agent_role = "Concierge"
+    conversation_history = ""
+
+    # Step 1: Engage with the user using the conversation flow from the Excel file
+    conversation_chain = create_conversation_chain()
+
+    for index, row in df.iterrows():
+        # Extract role-specific data
+        user_message = row['User Message']
+        assistant_message = row['Assistant Message']
+
+        # Append the conversation history for each step
+        conversation_history += f"User: {user_message}\n"
+        conversation_history += f"Assistant: {assistant_message}\n"
+
+        # Get the agent's response based on the conversation flow
+        try:
+            agent_response = conversation_chain.run(agent_name=agent_name, 
+                                                    agent_role=agent_role, 
+                                                    conversation_history=conversation_history, 
+                                                    user_message=user_message)
+
+            # Display the agent's response
+            st.write(f"**{agent_name} (Concierge):** {agent_response}")
+
+            # Update conversation history with agent's response
+            conversation_history += f"Assistant: {agent_response}\n"
+        except Exception as e:
+            # Catch and display any errors
+            st.error(f"Error occurred during agent response generation: {e}")
+
+if __name__ == "__main__":
+    main()
