@@ -3,7 +3,7 @@ import openai
 import streamlit as st
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
-from langchain.chains import ConversationChain
+from langchain.chains import RunnableWithMessageHistory
 from langchain.memory import ConversationBufferMemory
 
 # Load API keys securely from Streamlit secrets
@@ -16,7 +16,7 @@ def load_conversation_flow():
     df = pd.read_excel(excel_file_path)
     return df
 
-# Create a ConversationChain based on the loaded conversation flow
+# Create a RunnableWithMessageHistory based on the loaded conversation flow
 def create_conversation_chain():
     # Set up the LLM (GPT-4 model) with OpenAI API key
     llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4")
@@ -30,8 +30,8 @@ def create_conversation_chain():
         template="The following is a conversation with an AI assistant:\n{conversation_history}User: {user_message}\nAssistant:"
     )
     
-    # Create conversation chain with memory and prompt
-    conversation_chain = ConversationChain(
+    # Create a RunnableWithMessageHistory with memory and prompt
+    conversation_chain = RunnableWithMessageHistory(
         llm=llm,
         memory=memory,
         prompt=prompt
