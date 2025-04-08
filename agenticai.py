@@ -14,8 +14,15 @@ excel_file_path = 'conversation_flow.xlsx'
 
 # Load the conversation flow from the Excel file
 def load_conversation_flow():
-    df = pd.read_excel(excel_file_path)
-    return df
+    try:
+        df = pd.read_excel(excel_file_path)
+        return df
+    except FileNotFoundError:
+        st.error(f"Error: File '{excel_file_path}' not found.")
+        return None
+    except Exception as e:
+        st.error(f"An error occurred while loading the Excel file: {e}")
+        return None
 
 # Create the conversation chain with memory and prompt
 def create_conversation_chain():
@@ -32,7 +39,11 @@ def create_conversation_chain():
     )
     
     # Initialize the OpenAI chat model (GPT-4)
-    llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4")
+    try:
+        llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4")
+    except Exception as e:
+        st.error(f"Error initializing ChatOpenAI: {e}")
+        return None
 
     # Set up memory to store conversation history
     memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
@@ -50,8 +61,14 @@ def main():
     # Load the conversation flow data
     df = load_conversation_flow()
 
+    if df is None:
+        return  # Exit if Excel loading failed
+
     # Create the conversation chain
     conversation_chain = create_conversation_chain()
+
+    if conversation_chain is None:
+        return #Exit if chain creation failed.
 
     # Initialize conversation history
     conversation_history = ""
@@ -67,10 +84,14 @@ def main():
         conversation_history += f"User: {user_message}\n"
         
         # Run the conversation chain and get the agent's response
-        agent_response = conversation_chain.run(
-            {"conversation_history": conversation_history, "user_message": user_message}
-        )
-        
+        try:
+            agent_response = conversation_chain.run(
+                {"conversation_history": conversation_history, "user_message": user_message}
+            )
+        except Exception as e:
+            st.error(f"Error during conversation chain run: {e}")
+            return
+
         # Display the agent's response
         st.write(f"Assistant: {agent_response}")
         
