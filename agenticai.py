@@ -7,8 +7,8 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 import openai
 
-# OpenAI API Key (set up in Streamlit secrets)
-openai.api_key = "open-ai-key"  # Replace this with your actual OpenAI API key or use Streamlit secrets
+# Load API keys securely from Streamlit secrets
+openai_api_key = st.secrets.get("open-ai-key", "")
 
 # Load the conversation flow from Excel file
 def load_conversation_flow(file_path):
