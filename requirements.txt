@@ -9,3 +9,5 @@ requests
 wikipedia
 langchain_community
 langchain-openai
+pandas
+openpyxl
