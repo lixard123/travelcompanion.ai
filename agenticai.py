@@ -1,14 +1,12 @@
+import os
 import streamlit as st
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 import openai
 from langchain.document_loaders import PyPDFLoader
-from langchain.vectorstores import FAISS
-from langchain.embeddings import OpenAIEmbeddings
 
 # Load API keys securely from Streamlit secrets
 openai_api_key = st.secrets.get("open-ai-key", "")
@@ -18,14 +16,21 @@ def load_conversation_flow(file_path):
     df = pd.read_excel(file_path)
     return df
 
-# Function to load and process PDF brochures
-def load_pdf(pdf_path):
-    loader = PyPDFLoader(pdf_path)
-    pages = loader.load_and_split()
-    return pages
+# Function to load and process PDF brochures from the brochures folder
+def load_pdf_from_folder(pdf_folder_path):
+    pdf_files = [f for f in os.listdir(pdf_folder_path) if f.endswith('.pdf')]
+    all_pages_content = {}
+    
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(pdf_folder_path, pdf_file)
+        loader = PyPDFLoader(pdf_path)
+        pages = loader.load_and_split()
+        all_pages_content[pdf_file] = " ".join([page.page_content for page in pages])
+    
+    return all_pages_content
 
 # Define the LLM and Conversation Chain
-def create_conversation_chain(pages):
+def create_conversation_chain(brochure_content):
     # Initialize the memory to store conversation history
     memory = ConversationBufferMemory(memory_key="conversation_history", return_messages=True)
 
@@ -55,22 +60,18 @@ def create_conversation_chain(pages):
 
 # Main function to handle the app flow
 def main():
-    # File path to the conversation flow and PDF brochures (assuming they're in the home directory)
+    # File path to the conversation flow (assuming it's in the home directory)
     excel_path = "travel_agent_conversation_flow.xlsx"
-    pdf_path = "brochure.pdf"  # Path to your brochure PDF
-
+    
     # Load conversation flow from Excel file
     df = load_conversation_flow(excel_path)
-    
-    # Load and process PDF brochure
-    pages = load_pdf(pdf_path)
-
-    # Initialize conversation chain with brochure content
-    brochure_content = " ".join([page.page_content for page in pages])
-    conversation_chain = create_conversation_chain(brochure_content)
 
     # Streamlit app title
     st.title("Travel Companion Agent Chat")
+
+    # Load PDF brochures from the "brochures" folder
+    brochure_folder_path = "brochures"
+    all_brochures_content = load_pdf_from_folder(brochure_folder_path)
 
     # Display the instructions to the user
     st.write("Welcome! I am here to help with your travel plans. Let me know what you'd like assistance with.")
@@ -90,6 +91,9 @@ def main():
         conversation_history += f"User: {user_message}\n"
         conversation_history += f"Assistant: {assistant_message}\n"
 
+        # Get brochure content for this conversation step (assuming we're using the first brochure file here)
+        brochure_content = " ".join(all_brochures_content.values())  # You can modify to select a specific brochure
+        
         # Get the agent's response based on the conversation flow and brochure content
         agent_response = conversation_chain.run(agent_name=agent_name, 
                                                 agent_role=agent_role, 
