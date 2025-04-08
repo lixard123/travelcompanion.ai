@@ -77,7 +77,7 @@ def main():
     if st.session_state.step_index < len(df):
         current_step_message = df.iloc[st.session_state.step_index]['Message']
         st.text(f"Assistant: {current_step_message}")  # Show the assistant's message from CSV
-        user_message = st.text_input("Your response:", key="user_input") #changed prompt
+        user_message = st.text_input("Your response:", key="user_input", value="") #changed prompt, added value
 
         if user_message:
             st.write(f"User: {user_message}")
@@ -95,7 +95,6 @@ def main():
             st.session_state.conversation_history = conversation_history
 
             st.session_state.step_index += 1  # Move to the next step
-            st.session_state.user_input = ""
             st.rerun()
     else:
         st.write("End of conversation flow.")
